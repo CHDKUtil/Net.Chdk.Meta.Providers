@@ -1,24 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace Net.Chdk.Meta.Providers
 {
-    sealed class CameraMetaProvider : ICameraMetaProvider
+    sealed class CameraMetaProvider : SingleProductProvider<IProductCameraMetaProvider>, ICameraMetaProvider
     {
-        private IEnumerable<IProductCameraMetaProvider> CameraProviders { get; }
-
-        public CameraMetaProvider(IEnumerable<IProductCameraMetaProvider> cameraProviders)
+        public CameraMetaProvider(IEnumerable<IProductCameraMetaProvider> innerProviders)
+            : base(innerProviders)
         {
-            CameraProviders = cameraProviders;
         }
 
         public CameraInfo GetCamera(string productName, string fileName)
         {
-            var provider = CameraProviders.SingleOrDefault(p => productName.Equals(p.ProductName, StringComparison.Ordinal));
-            if (provider == null)
-                throw new InvalidOperationException($"Unknown product: {productName}");
-            return provider.GetCamera(fileName);
+            return GetInnerProvider(productName).GetCamera(fileName);
         }
     }
 }
